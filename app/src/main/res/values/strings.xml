@@ -1,3 +1,75 @@
 <resources>
     <string name="app_name">JoyMu</string>
+    <string name="app_tagline">Find homes in Kenya 🇰🇪</string>
+    <string name="app_branding">JoyMu Rentals</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_explore">Explore</string>
+    <string name="tab_saved">Saved</string>
+    <string name="tab_post">Post Home</string>
+    <string name="tab_profile">Profile</string>
+
+    <!-- Search & Filters -->
+    <string name="search_placeholder">Search in Kilimani, Westlands, Nyali...</string>
+    <string name="featured_listings">Featured Listings ⭐</string>
+    <string name="explore_properties">Explore Properties</string>
+    <string name="search_results">Search Results</string>
+    <string name="filtered_homes">Filtered Homes 🎛️</string>
+    <string name="nearby_homes">Nearby Homes (PostGIS Search)</string>
+    <string name="no_homes_found">No homes match your filter criteria</string>
+    <string name="try_changing_filters">Try resetting filters or adjusting your price range.</string>
+    <string name="reset_all_filters">Reset All Filters</string>
+    <string name="filter_properties_title">Filter Properties 🎛️</string>
+    <string name="reset_all">Reset All</string>
+    <string name="monthly_rent_range">Monthly Rent Range (KSh)</string>
+    <string name="bedrooms_count">Bedrooms Count</string>
+    <string name="bathrooms_count">Bathrooms Count</string>
+    <string name="specific_amenities">Specific Amenities</string>
+    <string name="apply_filters">Apply Filters (%1$d homes match)</string>
+
+    <!-- Property Details & Contact -->
+    <string name="verified_agent">Verified Agent</string>
+    <string name="verified_listing">Verified Listing</string>
+    <string name="call_agent">Call Agent</string>
+    <string name="whatsapp_agent">WhatsApp</string>
+    <string name="amenities_and_features">Amenities &amp; Features</string>
+    <string name="about_property">About this property</string>
+    <string name="inquire_or_book">Inquire / Book</string>
+    <string name="rent_price">Rent Price</string>
+    <string name="listed_by_agent">Listed by Agent</string>
+
+    <!-- Post Property Screen -->
+    <string name="post_property_title">Post a Property Listing</string>
+    <string name="add_property_photos">Add High-Res Property Photos</string>
+    <string name="photo_upload_hint">First photo will be the main listing cover</string>
+    <string name="property_title_label">Property Title</string>
+    <string name="rent_price_label">Rent Price (KSh / Month or Night)</string>
+    <string name="location_label">Location &amp; Neighborhood</string>
+    <string name="bedrooms_label">Bedrooms</string>
+    <string name="bathrooms_label">Bathrooms</string>
+    <string name="property_type_label">Property Type</string>
+    <string name="included_amenities">Included Amenities</string>
+    <string name="property_description">Property Description</string>
+    <string name="publish_listing">Publish Property Listing</string>
+    <string name="listing_published">Listing Published!</string>
+    <string name="listing_published_sub">Your property and photos are live on Supabase Storage &amp; Database.</string>
+    <string name="view_live_listings">View Live Listings</string>
+
+    <!-- Agent Portal & Inquiries -->
+    <string name="agent_portal_title">Agent Portal &amp; Management</string>
+    <string name="my_posted_listings">My Posted Listings 🏠</string>
+    <string name="tenant_inquiries_inbox">Tenant Inquiries Inbox 📬</string>
+    <string name="sign_in_register">Sign In / Register as Agent</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="reply_whatsapp">Reply WhatsApp</string>
+    <string name="call">Call</string>
+    <string name="account_settings">Account Settings</string>
+
+    <!-- Auth Screen -->
+    <string name="auth_title">JoyMu Authentication</string>
+    <string name="welcome_back">Welcome Back 👋</string>
+    <string name="create_account">Create Account 🇰🇪</string>
+    <string name="sign_in">Sign In</string>
+    <string name="register">Register</string>
+    <string name="phone_sms">Phone SMS</string>
 </resources>
