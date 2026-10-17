@@ -27,6 +27,7 @@ import coil.compose.AsyncImage
 import com.example.joymu.model.Property
 import com.example.joymu.ui.theme.JoyGreenPrimary
 import com.example.joymu.ui.theme.JoyTerracottaSecondary
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -413,36 +414,116 @@ fun PropertyDetailScreen(
         }
     }
 
-    // Reservation Dialog / M-Pesa Prompt Mock
+    var tenantName by remember { mutableStateOf("") }
+    var tenantPhone by remember { mutableStateOf("+254 ") }
+    var inquiryMessage by remember { mutableStateOf("Hi ${property.agent.name}, is ${property.title} available for a viewing this Saturday?") }
+    var isInquirySent by remember { mutableStateOf(false) }
+    var isSending by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val inquiryRepository = remember { com.example.joymu.data.supabase.InquiryRepository() }
+
+    // Tenant Direct Inquiry Dialog
     if (showBookingDialog) {
         AlertDialog(
             onDismissRequest = { showBookingDialog = false },
-            title = { Text("Reserve or Inquire") },
+            title = {
+                Text(
+                    text = if (isInquirySent) "Inquiry Sent! 📬" else "Send Direct Inquiry to Agent",
+                    fontWeight = FontWeight.Bold
+                )
+            },
             text = {
-                Column {
-                    Text("Secure this property directly with ${property.agent.name}.")
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text("100% Protected M-Pesa Holding Account via JoyMu Escrow.", fontWeight = FontWeight.SemiBold, fontSize = 13.sp, color = JoyGreenPrimary)
+                if (isInquirySent) {
+                    Column {
+                        Text(
+                            text = "Your message has been delivered to ${property.agent.name} and saved to Supabase.",
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "The agent will reply via SMS or WhatsApp shortly.",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            text = "Fill in your details to request a viewing or property details:",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        OutlinedTextField(
+                            value = tenantName,
+                            onValueChange = { tenantName = it },
+                            label = { Text("Your Name") },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        OutlinedTextField(
+                            value = tenantPhone,
+                            onValueChange = { tenantPhone = it },
+                            label = { Text("M-Pesa / Phone Number") },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        OutlinedTextField(
+                            value = inquiryMessage,
+                            onValueChange = { inquiryMessage = it },
+                            label = { Text("Inquiry Message") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(90.dp),
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                    }
                 }
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        val waIntent = Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse("https://wa.me/${property.agent.whatsappNumber}?text=Hi%20JoyMu,%20I'm%20requesting%20a%20viewing/booking%20for%20${property.title}")
-                        )
-                        context.startActivity(waIntent)
-                        showBookingDialog = false
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = JoyGreenPrimary)
-                ) {
-                    Text("Pay Deposit via M-Pesa")
+                if (isInquirySent) {
+                    Button(
+                        onClick = {
+                            showBookingDialog = false
+                            isInquirySent = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = JoyGreenPrimary)
+                    ) {
+                        Text("Done")
+                    }
+                } else {
+                    Button(
+                        onClick = {
+                            if (tenantName.isBlank() || tenantPhone.isBlank()) return@Button
+                            isSending = true
+                            coroutineScope.launch {
+                                val dto = com.example.joymu.model.InquiryDto(
+                                    propertyId = property.id,
+                                    propertyTitle = property.title,
+                                    tenantName = tenantName,
+                                    tenantPhone = tenantPhone,
+                                    message = inquiryMessage
+                                )
+                                inquiryRepository.sendInquiry(dto)
+                                isSending = false
+                                isInquirySent = true
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = JoyGreenPrimary),
+                        enabled = !isSending
+                    ) {
+                        if (isSending) {
+                            CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
+                        } else {
+                            Text("Send Inquiry")
+                        }
+                    }
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showBookingDialog = false }) {
-                    Text("Cancel")
+                if (!isInquirySent) {
+                    TextButton(onClick = { showBookingDialog = false }) {
+                        Text("Cancel")
+                    }
                 }
             }
         )
