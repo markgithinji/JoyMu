@@ -6,25 +6,32 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.joymu.data.supabase.AuthRepository
 import com.example.joymu.ui.theme.JoyGreenPrimary
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
+    onNavigateToAuth: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val authRepository = remember { AuthRepository() }
+    var currentUser by remember { mutableStateOf(authRepository.getCurrentUser()) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -65,26 +72,45 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = "Otieno Real Estate",
+                        text = currentUser?.email ?: "Otieno Real Estate",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
 
                     Text(
-                        text = "Nairobi Prime Properties • Verified Agent 🇰🇪",
+                        text = if (currentUser != null) "Logged in via Supabase Auth 🟢" else "Nairobi Prime Properties • Verified Agent 🇰🇪",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        ProfileStat(number = "14", label = "Active Listings")
-                        ProfileStat(number = "4.9 ★", label = "Rating")
-                        ProfileStat(number = "98%", label = "M-Pesa Payouts")
+                    if (currentUser == null) {
+                        Button(
+                            onClick = onNavigateToAuth,
+                            colors = ButtonDefaults.buttonColors(containerColor = JoyGreenPrimary),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(imageVector = Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Sign In / Register as Agent", fontWeight = FontWeight.Bold)
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    authRepository.signOut()
+                                    currentUser = null
+                                }
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(imageVector = Icons.AutoMirrored.Filled.Logout, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Sign Out")
+                        }
                     }
                 }
             }
@@ -112,13 +138,13 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.width(14.dp))
                     Column {
                         Text(
-                            text = "Supabase Backend Ready ⚡",
+                            text = "Supabase Auth Active 🔒",
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
                             color = JoyGreenPrimary
                         )
                         Text(
-                            text = "PostgreSQL + PostGIS spatial location queries & M-Pesa webhooks ready.",
+                            text = "Email, Password & Phone SMS OTP authentication integrated.",
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -148,25 +174,12 @@ fun ProfileScreen(
                     subtitle = "Verified status active"
                 )
                 SettingsOptionRow(
-                    icon = Icons.Default.Notifications,
-                    title = "Tenant Inquiry Alerts",
-                    subtitle = "Instant SMS & WhatsApp notifications"
-                )
-                SettingsOptionRow(
                     icon = Icons.AutoMirrored.Filled.Help,
                     title = "JoyMu Support & Agent Help",
                     subtitle = "Call +254 700 000 000"
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun ProfileStat(number: String, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = number, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = JoyGreenPrimary)
-        Text(text = label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

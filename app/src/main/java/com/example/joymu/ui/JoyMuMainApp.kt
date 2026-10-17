@@ -38,6 +38,7 @@ fun JoyMuMainApp() {
     var propertiesList by remember { mutableStateOf(DummyData.sampleProperties) }
     var selectedTab by remember { mutableStateOf(JoyMuTab.EXPLORE) }
     var selectedPropertyForDetail by remember { mutableStateOf<Property?>(null) }
+    var isShowingAuthScreen by remember { mutableStateOf(false) }
 
     // Fetch properties from Supabase on app launch
     LaunchedEffect(Unit) {
@@ -65,7 +66,7 @@ fun JoyMuMainApp() {
     Scaffold(
         bottomBar = {
             AnimatedVisibility(
-                visible = selectedPropertyForDetail == null,
+                visible = selectedPropertyForDetail == null && !isShowingAuthScreen,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -108,7 +109,12 @@ fun JoyMuMainApp() {
             }
         }
     ) { innerPadding ->
-        if (selectedPropertyForDetail != null) {
+        if (isShowingAuthScreen) {
+            AuthScreen(
+                onAuthSuccess = { isShowingAuthScreen = false },
+                onBackClick = { isShowingAuthScreen = false }
+            )
+        } else if (selectedPropertyForDetail != null) {
             PropertyDetailScreen(
                 property = selectedPropertyForDetail!!,
                 onBackClick = { selectedPropertyForDetail = null },
@@ -140,6 +146,7 @@ fun JoyMuMainApp() {
                     modifier = modifier
                 )
                 JoyMuTab.PROFILE -> ProfileScreen(
+                    onNavigateToAuth = { isShowingAuthScreen = true },
                     modifier = modifier
                 )
             }
