@@ -27,9 +27,14 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.joymu.data.supabase.AuthRepository
 import com.example.joymu.data.supabase.InquiryRepository
+import com.example.joymu.data.supabase.PropertyRepository
 import com.example.joymu.model.InquiryDto
+import com.example.joymu.model.Property
 import com.example.joymu.ui.theme.JoyGreenPrimary
+import com.example.joymu.ui.theme.JoyTerracottaSecondary
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,17 +46,33 @@ fun ProfileScreen(
     val coroutineScope = rememberCoroutineScope()
     val authRepository = remember { AuthRepository() }
     val inquiryRepository = remember { InquiryRepository() }
+    val propertyRepository = remember { PropertyRepository() }
 
     var currentUser by remember { mutableStateOf(authRepository.getCurrentUser()) }
     var inquiriesList by remember { mutableStateOf<List<InquiryDto>>(emptyList()) }
-    var isLoadingInquiries by remember { mutableStateOf(true) }
+    var myPropertiesList by remember { mutableStateOf<List<Property>>(emptyList()) }
+    var isLoadingData by remember { mutableStateOf(true) }
+
+    // Dialog state for updating property price
+    var propertyToEdit by remember { mutableStateOf<Property?>(null) }
+    var newPriceText by remember { mutableStateOf("") }
+    var propertyToDelete by remember { mutableStateOf<Property?>(null) }
+
+    fun loadData() {
+        coroutineScope.launch {
+            isLoadingData = true
+            val inqResult = inquiryRepository.fetchInquiries()
+            inqResult.onSuccess { inquiriesList = it }
+
+            val propResult = propertyRepository.fetchProperties()
+            propResult.onSuccess { myPropertiesList = it }
+
+            isLoadingData = false
+        }
+    }
 
     LaunchedEffect(Unit) {
-        val result = inquiryRepository.fetchInquiries()
-        isLoadingInquiries = false
-        result.onSuccess { list ->
-            inquiriesList = list
-        }
+        loadData()
     }
 
     Column(
@@ -61,7 +82,7 @@ fun ProfileScreen(
     ) {
         TopAppBar(
             title = {
-                Text("Agent Portal & Inquiries", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text("Agent Portal & Management", fontWeight = FontWeight.Bold, fontSize = 20.sp)
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
         )
@@ -140,7 +161,93 @@ fun ProfileScreen(
                 }
             }
 
-            // Tenant Inquiries Section Header
+            // Section 1: My Posted Homes (Agent Management)
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "My Posted Listings 🏠",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Badge(containerColor = JoyGreenPrimary) {
+                        Text("${myPropertiesList.size} Properties", color = Color.White)
+                    }
+                }
+            }
+
+            if (myPropertiesList.isNotEmpty()) {
+                items(myPropertiesList) { property ->
+                    val formattedPrice = NumberFormat.getNumberInstance(Locale.US).format(property.priceKes)
+
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            AsyncImage(
+                                model = property.images.firstOrNull(),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(70.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = property.title,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = property.location,
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "KSh $formattedPrice ${property.pricePeriod}",
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 13.sp,
+                                    color = JoyGreenPrimary
+                                )
+                            }
+
+                            Column(horizontalAlignment = Alignment.End) {
+                                IconButton(
+                                    onClick = {
+                                        propertyToEdit = property
+                                        newPriceText = property.priceKes.toString()
+                                    }
+                                ) {
+                                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit Price", tint = JoyGreenPrimary)
+                                }
+                                IconButton(
+                                    onClick = {
+                                        propertyToDelete = property
+                                    }
+                                ) {
+                                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = JoyTerracottaSecondary)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Section 2: Tenant Inquiries Section Header
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -159,7 +266,7 @@ fun ProfileScreen(
             }
 
             // Inquiries List
-            if (isLoadingInquiries) {
+            if (isLoadingData) {
                 item {
                     Box(modifier = Modifier.fillMaxWidth().padding(20.dp), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp), color = JoyGreenPrimary)
@@ -343,6 +450,77 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
+    }
+
+    // Edit Price Dialog
+    if (propertyToEdit != null) {
+        AlertDialog(
+            onDismissRequest = { propertyToEdit = null },
+            title = { Text("Update Rent Price (KSh)") },
+            text = {
+                Column {
+                    Text(text = propertyToEdit!!.title, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = newPriceText,
+                        onValueChange = { newPriceText = it },
+                        label = { Text("New Monthly Rent (KES)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val priceInt = newPriceText.toIntOrNull()
+                        if (priceInt != null) {
+                            coroutineScope.launch {
+                                propertyRepository.updatePropertyPrice(propertyToEdit!!.id, priceInt)
+                                propertyToEdit = null
+                                loadData()
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = JoyGreenPrimary)
+                ) {
+                    Text("Save Price")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { propertyToEdit = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // Delete Listing Confirmation Dialog
+    if (propertyToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { propertyToDelete = null },
+            title = { Text("Delete Listing?") },
+            text = { Text("Are you sure you want to remove '${propertyToDelete!!.title}' from Supabase?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            propertyRepository.deleteProperty(propertyToDelete!!.id)
+                            propertyToDelete = null
+                            loadData()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = JoyTerracottaSecondary)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { propertyToDelete = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 

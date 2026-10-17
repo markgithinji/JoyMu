@@ -94,6 +94,42 @@ class PropertyRepository {
         }
     }
 
+    suspend fun updatePropertyPrice(propertyId: String, newPriceKes: Int): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            SupabaseClientProvider.client
+                .from("properties")
+                .update(
+                    {
+                        set("price_kes", newPriceKes)
+                    }
+                ) {
+                    filter {
+                        eq("id", propertyId)
+                    }
+                }
+
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteProperty(propertyId: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            SupabaseClientProvider.client
+                .from("properties")
+                .delete {
+                    filter {
+                        eq("id", propertyId)
+                    }
+                }
+
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun uploadPhoto(context: Context, uri: Uri): Result<String> = withContext(Dispatchers.IO) {
         try {
             val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
