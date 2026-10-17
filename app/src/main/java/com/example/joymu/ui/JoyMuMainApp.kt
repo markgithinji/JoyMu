@@ -13,8 +13,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.joymu.R
 import com.example.joymu.data.DummyData
 import com.example.joymu.data.supabase.PropertyRepository
 import com.example.joymu.model.Property
@@ -22,11 +24,11 @@ import com.example.joymu.ui.screens.*
 import com.example.joymu.ui.theme.JoyGreenPrimary
 import kotlinx.coroutines.launch
 
-enum class JoyMuTab(val title: String, val icon: ImageVector) {
-    EXPLORE("Explore", Icons.Default.Explore),
-    SAVED("Saved", Icons.Default.Favorite),
-    POST("Post Home", Icons.Default.AddCircle),
-    PROFILE("Profile", Icons.Default.Person)
+enum class JoyMuTab(val titleRes: Int, val icon: ImageVector) {
+    EXPLORE(R.string.tab_explore, Icons.Default.Explore),
+    SAVED(R.string.tab_saved, Icons.Default.Favorite),
+    POST(R.string.tab_post, Icons.Default.AddCircle),
+    PROFILE(R.string.tab_profile, Icons.Default.Person)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,6 +78,7 @@ fun JoyMuMainApp() {
                 ) {
                     JoyMuTab.entries.forEach { tab ->
                         val isSelected = selectedTab == tab
+                        val tabTitle = stringResource(tab.titleRes)
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = { selectedTab = tab },
@@ -86,15 +89,15 @@ fun JoyMuMainApp() {
                                             Badge { Text("$savedCount") }
                                         }
                                     ) {
-                                        Icon(imageVector = tab.icon, contentDescription = tab.title)
+                                        Icon(imageVector = tab.icon, contentDescription = tabTitle)
                                     }
                                 } else {
-                                    Icon(imageVector = tab.icon, contentDescription = tab.title)
+                                    Icon(imageVector = tab.icon, contentDescription = tabTitle)
                                 }
                             },
                             label = {
                                 Text(
-                                    text = tab.title,
+                                    text = tabTitle,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                                 )
                             },

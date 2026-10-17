@@ -12,9 +12,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.joymu.R
 import com.example.joymu.model.FilterState
 import com.example.joymu.model.Property
 import com.example.joymu.model.PropertyType
@@ -52,7 +54,7 @@ fun HomeScreen(
     var filterState by remember { mutableStateOf(FilterState()) }
     var showFilterSheet by remember { mutableStateOf(false) }
 
-    // Filter properties based on query, category, price range, bedrooms, bathrooms, and amenities
+    // Filter properties
     val filteredProperties = properties.filter { property ->
         val matchesCategory = (selectedCategory == PropertyType.ALL) || (property.propertyType == selectedCategory)
         val matchesQuery = searchQuery.isBlank() ||
@@ -149,7 +151,7 @@ fun HomeScreen(
                         modifier = Modifier.padding(vertical = 8.dp)
                     ) {
                         Text(
-                            text = "Featured Listings ⭐",
+                            text = stringResource(R.string.featured_listings),
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
@@ -182,7 +184,7 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (filterState.isFiltered()) "Filtered Homes 🎛️" else if (selectedProximity.lat != null) "Nearby Homes (PostGIS Search)" else if (searchQuery.isNotBlank()) "Search Results" else "Explore Properties",
+                        text = if (filterState.isFiltered()) stringResource(R.string.filtered_homes) else if (selectedProximity.lat != null) stringResource(R.string.nearby_homes) else if (searchQuery.isNotBlank()) stringResource(R.string.search_results) else stringResource(R.string.explore_properties),
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
@@ -205,19 +207,19 @@ fun HomeScreen(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "No homes match your filter criteria",
+                                text = stringResource(R.string.no_homes_found),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Try resetting filters or adjusting your price range.",
+                                text = stringResource(R.string.try_changing_filters),
                                 fontSize = 13.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             TextButton(onClick = { filterState = FilterState() }) {
-                                Text("Reset All Filters", color = JoyGreenPrimary, fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.reset_all_filters), color = JoyGreenPrimary, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
