@@ -15,9 +15,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.joymu.model.FilterState
 import com.example.joymu.model.Property
 import com.example.joymu.model.PropertyType
 import com.example.joymu.ui.components.CategoryChipRow
+import com.example.joymu.ui.components.FilterBottomSheet
 import com.example.joymu.ui.components.PropertyCard
 import com.example.joymu.ui.components.SearchBarHeader
 import com.example.joymu.ui.theme.JoyGreenPrimary
@@ -47,8 +49,10 @@ fun HomeScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(PropertyType.ALL) }
     var selectedProximity by remember { mutableStateOf(proximityOptions.first()) }
+    var filterState by remember { mutableStateOf(FilterState()) }
+    var showFilterSheet by remember { mutableStateOf(false) }
 
-    // Filter properties
+    // Filter properties based on query, category, price range, bedrooms, bathrooms, and amenities
     val filteredProperties = properties.filter { property ->
         val matchesCategory = (selectedCategory == PropertyType.ALL) || (property.propertyType == selectedCategory)
         val matchesQuery = searchQuery.isBlank() ||
@@ -56,7 +60,24 @@ fun HomeScreen(
                 property.location.contains(searchQuery, ignoreCase = true) ||
                 property.neighborhood.contains(searchQuery, ignoreCase = true)
 
-        matchesCategory && matchesQuery
+        val matchesPrice = property.priceKes >= filterState.minPriceKes && property.priceKes <= filterState.maxPriceKes
+
+        val matchesBedrooms = when (val beds = filterState.selectedBedrooms) {
+            null -> true
+            4 -> property.bedrooms >= 4
+            else -> property.bedrooms == beds
+        }
+
+        val matchesBathrooms = when (val baths = filterState.selectedBathrooms) {
+            null -> true
+            3 -> property.bathrooms >= 3
+            else -> property.bathrooms == baths
+        }
+
+        val matchesAmenities = filterState.selectedAmenities.isEmpty() ||
+                property.amenities.containsAll(filterState.selectedAmenities)
+
+        matchesCategory && matchesQuery && matchesPrice && matchesBedrooms && matchesBathrooms && matchesAmenities
     }
 
     val featuredProperties = filteredProperties.filter { it.isFeatured }
@@ -69,7 +90,7 @@ fun HomeScreen(
             searchQuery = searchQuery,
             onQueryChange = { searchQuery = it },
             selectedLocation = selectedProximity.label.split(" ").firstOrNull() ?: "Nairobi",
-            onFilterClick = { /* Show Filter BottomSheet */ }
+            onFilterClick = { showFilterSheet = true }
         )
 
         // PostGIS Proximity Radius Row
@@ -122,7 +143,7 @@ fun HomeScreen(
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
             // Featured Properties Carousel
-            if (featuredProperties.isNotEmpty() && searchQuery.isBlank()) {
+            if (featuredProperties.isNotEmpty() && searchQuery.isBlank() && !filterState.isFiltered()) {
                 item {
                     Column(
                         modifier = Modifier.padding(vertical = 8.dp)
@@ -161,7 +182,7 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (selectedProximity.lat != null) "Nearby Homes (PostGIS Search)" else if (searchQuery.isNotBlank()) "Search Results" else "Explore Properties",
+                        text = if (filterState.isFiltered()) "Filtered Homes 🎛️" else if (selectedProximity.lat != null) "Nearby Homes (PostGIS Search)" else if (searchQuery.isNotBlank()) "Search Results" else "Explore Properties",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
@@ -184,16 +205,20 @@ fun HomeScreen(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "No homes match your distance filter",
+                                text = "No homes match your filter criteria",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Try increasing your radius or selecting 'All Kenya'.",
+                                text = "Try resetting filters or adjusting your price range.",
                                 fontSize = 13.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            TextButton(onClick = { filterState = FilterState() }) {
+                                Text("Reset All Filters", color = JoyGreenPrimary, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }
@@ -209,5 +234,22 @@ fun HomeScreen(
                 }
             }
         }
+    }
+
+    // Modal Filter Sheet
+    if (showFilterSheet) {
+        FilterBottomSheet(
+            filterState = filterState,
+            matchingCount = filteredProperties.size,
+            onApplyFilter = { newFilter ->
+                filterState = newFilter
+            },
+            onResetFilter = {
+                filterState = FilterState()
+            },
+            onDismissRequest = {
+                showFilterSheet = false
+            }
+        )
     }
 }
