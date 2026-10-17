@@ -127,6 +127,16 @@ fun JoyMuMainApp() {
                     properties = propertiesList,
                     onPropertyClick = { selectedPropertyForDetail = it },
                     onFavoriteToggle = { toggleFavorite(it) },
+                    onProximityFilter = { lat, lng, radiusKm ->
+                        coroutineScope.launch {
+                            val result = if (lat != null && lng != null) {
+                                repository.fetchNearbyProperties(lat, lng, radiusKm)
+                            } else {
+                                repository.fetchProperties()
+                            }
+                            result.onSuccess { propertiesList = it }
+                        }
+                    },
                     modifier = modifier
                 )
                 JoyMuTab.SAVED -> SavedScreen(

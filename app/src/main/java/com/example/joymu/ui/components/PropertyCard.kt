@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Bed
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -96,32 +97,62 @@ fun PropertyCard(
                     )
                 }
 
-                // Verified Badge (if verified)
-                if (property.isVerified) {
-                    Surface(
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(12.dp),
-                        shape = CircleShape,
-                        color = Color.Black.copy(alpha = 0.6f),
-                        contentColor = Color.White
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                // Verified Badge / Distance Badge
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (property.isVerified) {
+                        Surface(
+                            shape = CircleShape,
+                            color = Color.Black.copy(alpha = 0.65f),
+                            contentColor = Color.White
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Verified,
-                                contentDescription = "Verified",
-                                tint = JoyGreenPrimary,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "Verified Agent",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Verified,
+                                    contentDescription = "Verified",
+                                    tint = JoyGreenPrimary,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Verified Agent",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+
+                    if (property.distanceKm != null) {
+                        Surface(
+                            shape = CircleShape,
+                            color = JoyGreenPrimary,
+                            contentColor = Color.White
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.NearMe,
+                                    contentDescription = "Distance",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "${property.distanceKm} km away",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }

@@ -30,13 +30,19 @@ data class PropertyDto(
     val images: List<String> = emptyList(),
     val amenities: List<String> = emptyList(),
     @SerialName("agent_id")
-    val agentId: String? = null
+    val agentId: String? = null,
+    @SerialName("distance_meters")
+    val distanceMeters: Double? = null
 ) {
     fun toDomainModel(agent: Agent): Property {
         val type = try {
             PropertyType.valueOf(propertyType.uppercase())
         } catch (e: Exception) {
             PropertyType.APARTMENT
+        }
+
+        val distanceKm = distanceMeters?.let {
+            Math.round((it / 1000.0) * 10.0) / 10.0
         }
 
         return Property(
@@ -55,7 +61,8 @@ data class PropertyDto(
             isFeatured = isFeatured,
             images = images,
             agent = agent,
-            amenities = amenities
+            amenities = amenities,
+            distanceKm = distanceKm
         )
     }
 }

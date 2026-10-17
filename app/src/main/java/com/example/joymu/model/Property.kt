@@ -39,5 +39,6 @@ data class Property(
     val images: List<String>,
     val agent: Agent,
     val amenities: List<String>,
-    val isSaved: Boolean = false
+    val isSaved: Boolean = false,
+    val distanceKm: Double? = null
 )

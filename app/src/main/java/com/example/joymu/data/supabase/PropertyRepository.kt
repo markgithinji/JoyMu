@@ -5,9 +5,12 @@ import android.net.Uri
 import com.example.joymu.data.DummyData
 import com.example.joymu.model.Property
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import java.util.UUID
 
 class PropertyRepository {
@@ -30,6 +33,33 @@ class PropertyRepository {
             }
         } catch (e: Exception) {
             Result.success(DummyData.sampleProperties)
+        }
+    }
+
+    suspend fun fetchNearbyProperties(
+        lat: Double,
+        lng: Double,
+        radiusKm: Double
+    ): Result<List<Property>> = withContext(Dispatchers.IO) {
+        try {
+            val parametersJson = buildJsonObject {
+                put("user_lat", lat)
+                put("user_lng", lng)
+                put("radius_meters", radiusKm * 1000.0)
+            }
+
+            val dtoList = SupabaseClientProvider.client.postgrest.rpc(
+                function = "get_nearby_properties",
+                parameters = parametersJson
+            ).decodeList<PropertyDto>()
+
+            val properties = dtoList.map { dto ->
+                dto.toDomainModel(DummyData.sampleAgents.first())
+            }
+
+            Result.success(properties)
+        } catch (e: Exception) {
+            fetchProperties()
         }
     }
 
