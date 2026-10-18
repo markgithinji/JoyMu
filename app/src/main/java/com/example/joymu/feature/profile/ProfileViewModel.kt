@@ -3,6 +3,7 @@ package com.example.joymu.feature.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.joymu.core.data.InquiryRepository
+import com.example.joymu.core.data.InquiryRepositoryApi
 import com.example.joymu.core.data.PropertyRepository
 import com.example.joymu.core.model.InquiryDto
 import com.example.joymu.core.model.Property
@@ -24,7 +25,7 @@ sealed interface ProfileUiState {
 
 class ProfileViewModel(
     private val authRepository: AuthRepository = AuthRepository(),
-    private val inquiryRepository: InquiryRepository = InquiryRepository(),
+    private val inquiryRepository: InquiryRepositoryApi = InquiryRepository(),
     private val propertyRepository: PropertyRepository = PropertyRepository()
 ) : ViewModel() {
 

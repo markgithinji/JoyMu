@@ -3,6 +3,7 @@ package com.example.joymu.feature.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.joymu.core.data.InquiryRepository
+import com.example.joymu.core.data.InquiryRepositoryApi
 import com.example.joymu.core.model.InquiryDto
 import com.example.joymu.core.model.Property
 import kotlinx.coroutines.channels.Channel
@@ -36,7 +37,7 @@ sealed interface DetailUiEffect {
 
 class DetailViewModel(
     initialProperty: Property,
-    private val inquiryRepository: InquiryRepository = InquiryRepository()
+    private val inquiryRepository: InquiryRepositoryApi = InquiryRepository()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DetailUiState.Content(property = initialProperty))
