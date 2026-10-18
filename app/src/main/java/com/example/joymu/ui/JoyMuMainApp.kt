@@ -17,11 +17,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.joymu.R
-import com.example.joymu.data.DummyData
-import com.example.joymu.data.supabase.PropertyRepository
-import com.example.joymu.model.Property
-import com.example.joymu.ui.screens.*
-import com.example.joymu.ui.theme.JoyGreenPrimary
+import com.example.joymu.core.data.DummyData
+import com.example.joymu.core.data.PropertyRepository
+import com.example.joymu.core.designsystem.theme.JoyGreenPrimary
+import com.example.joymu.core.model.Property
+import com.example.joymu.feature.detail.PropertyDetailScreen
+import com.example.joymu.feature.explore.HomeScreen
+import com.example.joymu.feature.postproperty.PostPropertyScreen
+import com.example.joymu.feature.profile.AuthScreen
+import com.example.joymu.feature.profile.ProfileScreen
+import com.example.joymu.feature.saved.SavedScreen
 import kotlinx.coroutines.launch
 
 enum class JoyMuTab(val titleRes: Int, val icon: ImageVector) {
@@ -42,7 +47,6 @@ fun JoyMuMainApp() {
     var selectedPropertyForDetail by remember { mutableStateOf<Property?>(null) }
     var isShowingAuthScreen by remember { mutableStateOf(false) }
 
-    // Fetch properties from Supabase on app launch
     LaunchedEffect(Unit) {
         val result = repository.fetchProperties()
         result.onSuccess { fetchedList ->
