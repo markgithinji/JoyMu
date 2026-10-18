@@ -32,12 +32,14 @@ sealed interface ExploreUiEffect {
 
 ---
 
-## 2. Feature Data Isolation & Inter-Feature Contracts
-- **Feature-Specific Repositories & Data**:
-  - Any repository, DTO, or data model used exclusively by a single feature (e.g. `AuthRepository` in `feature.profile`, `InquiryRepository` in `feature.profile` / `feature.detail`) MUST live inside its respective feature package/module.
+## 2. Feature Data Isolation & Shared Core Contracts Rule
+- **Core Only Holds Shared Interface Contracts**:
+  - `:core:data` and `:core:model` MUST ONLY contain interface contracts and data models that are genuinely shared across 2 or more features (e.g. `InquiryRepositoryApi`, `Property`).
+- **Feature Data Ownership**:
+  - All feature-private repositories, implementations, DTOs, and data sources MUST live strictly inside their respective feature package (`feature.profile.data.AuthRepository`, `feature.detail.data`, etc.).
 - **Inter-Feature Decoupling**:
-  - Features MUST NEVER import or depend on each other directly (`:feature:explore` MUST NOT import `:feature:detail`).
-  - Cross-feature communication MUST occur via interface contracts defined in lower shared `:core:*` modules (`:core:model` or `:core:data`).
+  - Features MUST NEVER import or depend on other feature packages/modules directly (`:feature:explore` MUST NOT import `:feature:detail`).
+  - Cross-feature communication MUST occur via shared contract interfaces defined in `:core:data` or `:core:model`.
 
 ---
 
