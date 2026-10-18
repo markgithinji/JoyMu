@@ -2,11 +2,11 @@ package com.example.joymu.feature.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.joymu.core.data.AuthRepository
 import com.example.joymu.core.data.InquiryRepository
 import com.example.joymu.core.data.PropertyRepository
 import com.example.joymu.core.model.InquiryDto
 import com.example.joymu.core.model.Property
+import com.example.joymu.feature.profile.data.AuthRepository
 import io.github.jan.supabase.auth.user.UserInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

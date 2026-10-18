@@ -27,13 +27,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.joymu.R
-import com.example.joymu.core.data.AuthRepository
 import com.example.joymu.core.data.InquiryRepository
 import com.example.joymu.core.data.PropertyRepository
 import com.example.joymu.core.designsystem.theme.JoyGreenPrimary
 import com.example.joymu.core.designsystem.theme.JoyTerracottaSecondary
 import com.example.joymu.core.model.InquiryDto
 import com.example.joymu.core.model.Property
+import com.example.joymu.feature.profile.data.AuthRepository
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale

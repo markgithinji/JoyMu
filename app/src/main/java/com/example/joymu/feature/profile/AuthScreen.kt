@@ -17,8 +17,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.joymu.R
-import com.example.joymu.core.data.AuthRepository
 import com.example.joymu.core.designsystem.theme.JoyGreenPrimary
+import com.example.joymu.feature.profile.data.AuthRepository
 import kotlinx.coroutines.launch
 
 enum class AuthMode {

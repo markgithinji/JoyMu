@@ -1,4 +1,4 @@
-package com.example.joymu.core.data
+package com.example.joymu.feature.profile.data
 
 import com.example.joymu.core.network.SupabaseClientProvider
 import io.github.jan.supabase.auth.OtpType

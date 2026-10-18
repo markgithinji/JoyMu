@@ -6,9 +6,9 @@ import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class InquiryRepository {
+class InquiryRepository : InquiryRepositoryApi {
 
-    suspend fun sendInquiry(inquiry: InquiryDto): Result<Boolean> = withContext(Dispatchers.IO) {
+    override suspend fun sendInquiry(inquiry: InquiryDto): Result<Boolean> = withContext(Dispatchers.IO) {
         try {
             SupabaseClientProvider.client
                 .from("inquiries")
@@ -20,7 +20,7 @@ class InquiryRepository {
         }
     }
 
-    suspend fun fetchInquiries(): Result<List<InquiryDto>> = withContext(Dispatchers.IO) {
+    override suspend fun fetchInquiries(): Result<List<InquiryDto>> = withContext(Dispatchers.IO) {
         try {
             val dtoList = SupabaseClientProvider.client
                 .from("inquiries")

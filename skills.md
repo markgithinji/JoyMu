@@ -32,7 +32,16 @@ sealed interface ExploreUiEffect {
 
 ---
 
-## 2. Safe API Call Utility (`NetworkResult`)
+## 2. Feature Data Isolation & Inter-Feature Contracts
+- **Feature-Specific Repositories & Data**:
+  - Any repository, DTO, or data model used exclusively by a single feature (e.g. `AuthRepository` in `feature.profile`, `InquiryRepository` in `feature.profile` / `feature.detail`) MUST live inside its respective feature package/module.
+- **Inter-Feature Decoupling**:
+  - Features MUST NEVER import or depend on each other directly (`:feature:explore` MUST NOT import `:feature:detail`).
+  - Cross-feature communication MUST occur via interface contracts defined in lower shared `:core:*` modules (`:core:model` or `:core:data`).
+
+---
+
+## 3. Safe API Call Utility (`NetworkResult`)
 All API calls MUST be wrapped in a type-safe `NetworkResult<T>` sealed class to guarantee exception safety:
 
 ```kotlin
@@ -57,7 +66,7 @@ suspend fun <T> safeApiCall(apiCall: suspend () -> T): NetworkResult<T> {
 
 ---
 
-## 3. Edge-to-Edge & System Bar Insets
+## 4. Edge-to-Edge & System Bar Insets
 - `enableEdgeToEdge()` MUST be called in `onCreate()` before `setContent`.
 - `AndroidManifest.xml` MUST specify `android:windowSoftInputMode="adjustResize"`.
 - `Scaffold` padding values MUST be passed to `contentPadding` for `LazyColumn` / `LazyRow` to scroll cleanly behind navigation bars.
@@ -65,13 +74,13 @@ suspend fun <T> safeApiCall(apiCall: suspend () -> T): NetworkResult<T> {
 
 ---
 
-## 4. Material 3 Design System & Dark Mode
+## 5. Material 3 Design System & Dark Mode
 - Dynamic colors supported on Android 12+ (SDK 31+).
 - Emerald Green (`#006D44`) primary palette with custom Dark/Light `ColorScheme`.
 - Status & Navigation bar icon contrast auto-configured based on darkTheme state.
 
 ---
 
-## 5. String Localization Standard
+## 6. String Localization Standard
 - NO hardcoded string literals in `@Composable` functions.
 - All UI text MUST be declared in `res/values/strings.xml` and referenced using `stringResource(R.string.key)`.
